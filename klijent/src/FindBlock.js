@@ -16,6 +16,7 @@ const FindBlock = () => {
     useEffect(() => {
         fetch("http://localhost:8332/start").then((response) => response.json())
             .then((result) => {
+              console.log(result)
                 setTestInfo(result)
             })
     }, [])
@@ -25,10 +26,10 @@ const FindBlock = () => {
     const handleSearch = (e, data) => {
         e.preventDefault();
 
-        if(data.substring(0, 10) === "0000000000") {
+        if(data.substring(0, 8) === "00000000") {
             fetch("http://localhost:8332/getBlock/" + data).then((response) => response.json())
             .then((result) => {
-                console.log(result)
+                // console.log(result)
                 setBlockInfo(result)
                 // setTransaction([])
             })
@@ -165,8 +166,13 @@ const FindBlock = () => {
             {testInfo != null && blockInfo == null ? (
                 <div className="server">
                     <h1>Podatci o serveru</h1>
-                    <p>{testInfo.chain}</p>
+                    <p>Naziv: {testInfo.chain}</p>
                     <p>Broj blokova: { testInfo.blocks }</p>
+                    <p>Broj <i>headera</i>: { testInfo.headers }</p>
+                    <p><i>Hash</i> najboljeg bloka: {testInfo.bestblockhash}
+                    {/* <a href={"http://localhost:8332/getBlock/" + testInfo.bestblockhash} target="_blank" rel="noopener noreferrer">{testInfo.bestblockhash} </a> */}
+                    </p>
+                    <p>Veličina na disku: { testInfo.size_on_disk } B</p>
                 </div>
             ): blockInfo != null ? (<></>) : <h4>Neuspješno spjanje na server! {console.log(testInfo)}</h4>    
             }
