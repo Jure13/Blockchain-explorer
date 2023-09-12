@@ -107,6 +107,7 @@ function isValidSize(input) {
   })
 })*/
 
+
 app.get('/getTransaction/:txId', async (req, res) => {
   const txId = req.params.txId;
 
@@ -124,6 +125,60 @@ app.get('/getTransaction/:txId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+/*
+app.get('/getTransaction/:txId', async (req, res) => {
+  const txId = req.params.txId;
+
+  try {
+    const transactionExists = await checkTx(txId);
+
+    if (transactionExists) {
+      const tx = await client.getRawTransaction(txId);
+      const decTx = await client.decodeRawTransaction(tx);
+
+      // Extract sending and receiving addresses
+      const sendingAddresses = [];
+      const receivingAddresses = [];
+
+      for (const input of decTx.vin) {
+        if (input.coinbase !== undefined) {
+          // Coinbase transaction (mining reward)
+          sendingAddresses.push('Coinbase'); // You can customize this message
+        } else {
+          // Regular transaction input
+          const inputTx = await client.getRawTransaction(input.txid);
+          const inputDecTx = await client.decodeRawTransaction(inputTx);
+          sendingAddresses.push(inputDecTx.vout[input.vout].scriptPubKey.addresses[0]);
+        }
+      }
+
+      for (const output of decTx.vout) {
+        receivingAddresses.push(output.scriptPubKey.addresses[0]);
+      }
+
+      const addressDetails = {
+        txid: decTx.txid,
+        sendingAddresses,
+        receivingAddresses,
+        // Include other transaction details as needed
+        hash: decTx.hash,
+        size: decTx.size,
+        weight: decTx.weight,
+        locktime: decTx.locktime,
+        vin: decTx.vin,
+        vout: decTx.vout,
+      };
+
+      res.json(addressDetails);
+    } else {
+      res.status(404).json({ error: 'Transakcija ne postoji!' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});*/
+
 
 // Provjera transakcije
 async function checkTx(txId) {
@@ -216,3 +271,35 @@ async function fetchAddressDetails(address) {
 app.listen(port, () => {
   console.log("Running on port " + port);
 });
+
+/*
+async function getFee(txId) {
+  try {
+    const rawTx = await client.getRawTransaction(txId);
+    const decodedRawTx = await client.decodeRawTransaction(rawTx);
+    const vinVouts = [];
+
+    // Calculate the total value of referenced outputs from previous transactions
+    for (const vin of decodedRawTx.vin) {
+      if (vin.coinbase === null) {
+        const tempTx = await client.getRawTransaction(vin.txid);
+        const tempDecoded = await client.decodeRawTransaction(tempTx);
+
+        for (const voutIndex of vin.vout) {
+          vinVouts.push(tempDecoded.vout[voutIndex].value);
+        }
+      }
+    }
+
+    // Calculate the total value of the transaction's outputs
+    const voutOne = decodedRawTx.vout.reduce((total, output) => total + output.value, 0);
+
+    // Calculate the fee as the difference between total inputs and total outputs
+    const fee = vinVouts.reduce((total, value) => total + value, 0) - voutOne;
+
+    return fee < 0 ? 0 : fee; // Ensure the fee is non-negative
+  } catch (error) {
+    throw error;
+  }
+}
+*/
